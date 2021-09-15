@@ -8,6 +8,7 @@ var promptUser = () => {
     .prompt([
       {
         type: "list",
+        pageSize:15,
         name: "list",
         message: "What would you like to do?",
         choices: ['View all employees', 'View all employees by department', 'View all employees by manager', 'Add employee', 'Remove employee', 'Update employee role', 'Update employee manager', 'View all roles', 'Add role', 'Remove role', 'Exit node']
@@ -21,108 +22,64 @@ var promptUser = () => {
           } 
         ); 
         setTimeout(function afterTwoSeconds() {
-          console.log("========================================================================================")
+          console.log("\n===================================================================================================================\n")
           promptUser();
         }, 500);
       } else if (list === "View all employees by department") {
-        inquirer.prompt([
-          {
-            type: "list",
-            name: "departments",
-            message:"Choose a department",
-            choices: ['Sales', 'Engineering', 'Finance', 'Legal']
+        var departments = []
+        db.query(
+          'SELECT department_name FROM department;',
+          function (err, results, fields) {
+            for (i = 0; i < results.length; i++) {
+              departments.push(results[i].department_name)
+            } console.log(departments)
+            inquirer.prompt([
+              {
+                type: "list",
+                name: "departments",
+                message:"Choose a department",
+                choices: departments
+              }
+            ]).then(({ departments }) => {
+              db.query(
+                'SELECT employee.id, employee.first_name, employee.last_name, department.department_name AS Department FROM employee JOIN roles ON employee.roles_id = roles.id JOIN department ON roles.department_id = department.id WHERE department.department_name = "' + departments + '";',
+                function(err, results, fields) {
+                  console.table(results);
+                }
+              ); 
+              setTimeout(function afterTwoSeconds() {
+                console.log("\n===================================================================================================================\n")
+                promptUser();
+              }, 500);  
+            })
           }
-        ]).then(({ departments }) => {
-          if (departments === 'Sales') {
-            db.query(
-              'SELECT employee.id, employee.first_name, employee.last_name, department.department_name AS Department FROM employee JOIN roles ON employee.roles_id = roles.id JOIN department ON roles.department_id = department.id WHERE department.department_name = "Sales";',
-              function(err, results, fields) {
-                console.table(results);
-              }
-            ); 
-            setTimeout(function afterTwoSeconds() {
-              console.log("========================================================================================")
-              promptUser();
-            }, 500);
-          } else if (departments === 'Engineering') {
-            db.query(
-              'SELECT employee.id, employee.first_name, employee.last_name, department.department_name AS Department FROM employee JOIN roles ON employee.roles_id = roles.id JOIN department ON roles.department_id = department.id WHERE department.department_name = "Engineering";',
-              function(err, results, fields) {
-                console.table(results);
-              }
-            ); 
-            setTimeout(function afterTwoSeconds() {
-              console.log("========================================================================================")
-              promptUser();
-            }, 500);
-          } else if (departments === 'Finance') {
-            db.query(
-              'SELECT employee.id, employee.first_name, employee.last_name, department.department_name AS Department FROM employee JOIN roles ON employee.roles_id = roles.id JOIN department ON roles.department_id = department.id WHERE department.department_name = "Finance";',
-              function(err, results, fields) {
-                console.table(results);
-              }
-            ); 
-            setTimeout(function afterTwoSeconds() {
-              console.log("========================================================================================")
-              promptUser();
-            }, 500);
-          } else if (departments === 'Legal') {
-            db.query(
-              'SELECT employee.id, employee.first_name, employee.last_name, department.department_name AS Department FROM employee JOIN roles ON employee.roles_id = roles.id JOIN department ON roles.department_id = department.id WHERE department.department_name = "Legal";',
-              function(err, results, fields) {
-                console.table(results);
-              }
-            ); 
-            setTimeout(function afterTwoSeconds() {
-              console.log("========================================================================================")
-              promptUser();
-            }, 500);
-          }
-        })
+        ); 
       } else if (list === "View all employees by manager") {
-        inquirer.prompt([
-          {
-            type: "list",
-            name: "manager",
-            message:"Choose a manager",
-            choices: ['John Doe', 'J Torres', 'Sarah Lourd']
+        var managers = [];
+        db.query("SELECT DISTINCT CONCAT(m.first_name, ' ', m.last_name) AS Manager FROM employee e LEFT JOIN employee m ON m.id = e.manager_id WHERE m.first_name IS NOT NULL;",
+        function (err, results, fields) {
+          for (i = 0; i < results.length; i++) {
+            managers.push(results[i].Manager)
           }
-        ]).then(({ manager }) => {
-          if (manager === "John Doe") {
+          inquirer.prompt([
+            {
+              type: "list",
+              name: "manager",
+              message:"Choose a manager",
+              choices: managers
+            }
+          ]).then(({ manager }) => {
             db.query(
-              'SELECT e.id, e.first_name AS First, e.last_name as Last, m.first_name AS Manager FROM employee e LEFT JOIN employee m ON m.id = e.manager_id WHERE m.first_name = "John";',
-              function(err, results, fields) {
+              "SELECT e.id, e.first_name AS First, e.last_name as Last, CONCAT(m.first_name, ' ', m.last_name) AS Manager FROM employee e LEFT JOIN employee m ON m.id = e.manager_id WHERE CONCAT(m.first_name, ' ', m.last_name) = '" + manager + "';",
+              function (err, results, fields) {
                 console.table(results)
               }
-            ); 
-        setTimeout(function afterTwoSeconds() {
-          console.log("========================================================================================")
-          promptUser();
-        }, 500);
-          } else if (manager === "J Torres") {
-            db.query(
-              'SELECT e.id, e.first_name AS First, e.last_name as Last, m.first_name AS Manager FROM employee e LEFT JOIN employee m ON m.id = e.manager_id WHERE m.first_name = "J";',
-              function(err, results, fields) {
-                console.table(results)
-              }
-            ); 
-        setTimeout(function afterTwoSeconds() {
-          console.log("========================================================================================")
-          promptUser();
-        }, 500);
-          } else if (manager === 'Sarah Lourd') {
-            db.query(
-              'SELECT e.id, e.first_name AS First, e.last_name as Last, m.first_name AS Manager FROM employee e LEFT JOIN employee m ON m.id = e.manager_id WHERE m.first_name = "Sarah";',
-              function(err, results, fields) {
-                console.table(results);
-              }
-            ); 
-        setTimeout(function afterTwoSeconds() {
-          console.log("========================================================================================")
-          promptUser();
-        }, 500);
-          }
-        })
+            );  setTimeout(function afterTwoSeconds() {
+              console.log("\n===================================================================================================================\n")
+              promptUser();
+            }, 500);
+          })    
+        });
       } else if (list === "Add employee") {
         var roles = [];
         var managers = [];
@@ -154,15 +111,24 @@ var promptUser = () => {
             },
             {
               type: 'list',
+              pageSize: 15,
               name: 'role_id',
               message: "What is the employees role?",
               choices: roleTitles
             },
             {
+              type: 'confirm',
+              name: 'isManager',
+              message: "Will this employee have a manger?",
+              default: true
+            },
+            {
               type: 'list',
+              pageSize: 15,
               name: 'manager_id',
               message: "Who is the employee's manager?",
-              choices: managerTitles
+              choices: managerTitles,
+              when: ({ isManager }) => isManager
             }
           ]).then(data => {
             var role = ''
@@ -173,7 +139,8 @@ var promptUser = () => {
               }
             }
             for (i = 0; i < managers.length; i++) {
-              if (data.manager_id === managers[i].first_name + ' ' + managers[i].last_name) {
+              if (!data.manager_id) {manager = "''"}
+              else if (data.manager_id === managers[i].first_name + ' ' + managers[i].last_name) {
                 manager = managers[i].id
               }
             }
@@ -182,7 +149,7 @@ var promptUser = () => {
               console.log("Employee added!")
             ); 
             setTimeout(function afterTwoSeconds() {
-              console.log("========================================================================================")
+              console.log("\n===================================================================================================================\n")
               promptUser();
             }, 500);
           })
@@ -197,6 +164,7 @@ var promptUser = () => {
           inquirer.prompt([
             {
               type: "list",
+              pageSize: 15,
               name: "delete",
               message: "Choose an employee to delete.",
               choices: employees
@@ -207,7 +175,7 @@ var promptUser = () => {
               console.log("Employee removed")
             ); 
             setTimeout(function afterTwoSeconds() {
-              console.log("========================================================================================")
+              console.log("\n===================================================================================================================\n")
               promptUser();
             }, 500);
           })
@@ -234,12 +202,14 @@ var promptUser = () => {
           inquirer.prompt([
             {
               type: "list",
+              pageSize: 15,
               name: "update",
               message: "Choose an employee to update.",
               choices: employees
             },
             {
               type: "list",
+              pageSize: 15,
               name: "roles",
               message: "Choose a role.",
               choices: roleTitles
@@ -257,43 +227,55 @@ var promptUser = () => {
               console.log("Employee Role Updated!")
             ); 
             setTimeout(function afterTwoSeconds() {
-              console.log("========================================================================================")
+              console.log("\n===================================================================================================================\n")
               promptUser();
             }, 500);
           })
         })
       } else if (list === "Update employee manager") {
         var employees = [];
+        var employeeObjArr = [];
         db.query('SELECT employee.id, first_name, last_name FROM employee;',
         function(err, results, fields) {
           for (i = 0; i < results.length; i++) {
             employees.push(results[i].first_name + ' ' + results[i].last_name)
+            employeeObjArr.push({"id": results[i].id, "update": results[i].first_name + ' ' + results[i].last_name})
           }
           inquirer.prompt([
             {
               type: "list",
+              pageSize: 15,
               name: "update",
               message: "Choose an employee to update.",
               choices: employees
             },
             {
+              type: 'confirm',
+              name: 'isPromoted',
+              message: "Is this employee being promoted to manager?",
+              default: false
+            },
+            {
               type: "list",
+              pageSize: 15,
               name: "manager",
-              message: "Choose a role.",
-              choices: ['John Doe', 'J Torres', 'Sarah Lourd']
+              message: "Choose a manager.",
+              choices: employees,
+              when: ({isPromoted}) => isPromoted === false
             }
           ]).then(managerUpdate => {
             console.log(managerUpdate)
-            var manager = ''
-            if (managerUpdate.manager === 'John Doe') { manager = 1}
-            else if (managerUpdate.manager === 'J Torres') { manager = 3}
-            else if (managerUpdate.manager === 'Sarah Lourd') { manager = 7};
+            var manager_id = ''
+            for (i=0; i < employeeObjArr.length; i++) {
+              if (!managerUpdate.manager) {manager_id = "''"}
+              else if (managerUpdate.manager === employeeObjArr[i].update) {manager_id = employeeObjArr[i].id}
+            }
             db.query(
-              "UPDATE employee SET manager_id = " + manager + " WHERE CONCAT(first_name, ' ', last_name) = '" + managerUpdate.update + "';",
+              "UPDATE employee SET manager_id = " + manager_id + " WHERE CONCAT(first_name, ' ', last_name) = '" + managerUpdate.update + "';",
               console.log("Employee Manager Updated!")
             ); 
             setTimeout(function afterTwoSeconds() {
-              console.log("========================================================================================")
+              console.log("\n===================================================================================================================\n")
               promptUser();
             }, 500);
           })
@@ -304,42 +286,55 @@ var promptUser = () => {
           function(err, results, fields){console.table(results)}
         ); 
         setTimeout(function afterTwoSeconds() {
-          console.log("========================================================================================")
+          console.log("\n===================================================================================================================\n")
           promptUser();
         }, 500);
       } else if (list === "Add role") {
-        inquirer.prompt([
-          {
-            type: "input",
-            name: "title",
-            message: "What is title for the role?"
-          },
-          {
-            type: "input",
-            name: "salary",
-            message: "What salary will be associated with this role?"
-          },
-          {
-            type: "list",
-            name: "department",
-            message: "What department will the role belong to?",
-            choices: ["Sales", "Engineering", "Legal", "Finance"]
+        var departments = [];
+        var departmentsObjArr = [];
+        db.query(
+          'SELECT * FROM department;',
+          function (err, results, fields) {
+            for (i = 0; i < results.length; i++) {
+              departments.push(results[i].department_name)
+              departmentsObjArr.push({"id": results[i].id, "department": results[i].department_name})
+            }
+            inquirer.prompt([
+              {
+                type: "input",
+                name: "title",
+                message: "What is title for the role?"
+              },
+              {
+                type: "input",
+                name: "salary",
+                message: "What salary will be associated with this role?"
+              },
+              {
+                type: "list",
+                name: "department",
+                message: "What department will the role belong to?",
+                choices: departments
+              }
+            ]).then(rolesAdd => {
+              console.log(departmentsObjArr)
+              var department_id = '';
+              for (i = 0; i < departmentsObjArr.length; i++) {
+                if (rolesAdd.department === departmentsObjArr[i].department) {
+                  department_id = departmentsObjArr[i].id
+                }
+              }
+              db.query(
+                "INSERT INTO roles (title, salary, department_id) VALUES ('" + rolesAdd.title + "', " + rolesAdd.salary + ", " + department_id + ");",
+                console.log("Role added")
+              ); 
+              setTimeout(function afterTwoSeconds() {
+                console.log("\n===================================================================================================================\n")
+                promptUser();
+              }, 500);
+            })
           }
-        ]).then(rolesAdd => {
-          var department = '';
-          if (rolesAdd.department === 'Sales'){department = 1}
-          else if (rolesAdd.department === 'Engineering'){department = 2}
-          else if (rolesAdd.department === 'Legal'){department = 3}
-          else if (rolesAdd.department === 'Finance'){department = 4}
-          db.query(
-            "INSERT INTO roles (title, salary, department_id) VALUES ('" + rolesAdd.title + "', " + rolesAdd.salary + ", " + department + ");",
-            console.log("Role added")
-          ); 
-          setTimeout(function afterTwoSeconds() {
-            console.log("========================================================================================")
-            promptUser();
-          }, 500);
-        })
+        );
       } else if (list === "Remove role") {
         var roles = [];
         db.query('SELECT title, department.department_name AS department, salary FROM roles JOIN department ON roles.department_id = department.id;',
@@ -360,7 +355,7 @@ var promptUser = () => {
               console.log("Role deleted")
             ); 
             setTimeout(function afterTwoSeconds() {
-              console.log("========================================================================================")
+              console.log("\n===================================================================================================================\n")
               promptUser();
             }, 500);
           })
