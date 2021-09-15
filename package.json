@@ -1,16 +1,17 @@
 {
   "name": "employee_tracker",
   "version": "1.0.0",
-  "description": "AS A business owner I WANT to be able to view and manage the departments, roles, and employees in my company SO THAT I can organize and plan my business",
+  "description": "Developers are often tasked with creating interfaces that make it easy for non-developers to view and interact with information stored in databases. These interfaces are known as Content Management Systems (CMS). Your challenge this week is to build a command-line application to manage a company's database of employees using Node.js, Inquirer, and MySQL.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/itorres60/Employee_tracker.git"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -18,8 +19,8 @@
   },
   "homepage": "https://github.com/itorres60/Employee_tracker#readme",
   "dependencies": {
-    "console.table": "^0.10.0",
-    "express": "^4.17.1",
+    "c-log": "^0.0.3",
+    "console-table-printer": "^2.10.0",
     "inquirer": "^8.1.2",
     "mysql2": "^2.3.0"
   }
