@@ -16,7 +16,7 @@ var promptUser = () => {
     ]).then(({ list }) => {
       if (list === "View all employees") {
         db.query(
-          "SELECT e.id, e.first_name AS First, e.last_name as Last, roles.title AS Title, department.department_name AS Department, roles.salary, CONCAT(m.first_name, ' ', m.last_name) AS Manager FROM employee e LEFT JOIN employee m ON m.id = e.manager_id JOIN roles ON e.roles_id = roles.id JOIN department ON roles.department_id = department.id",
+          "SELECT e.id, e.first_name AS First, e.last_name as Last, roles.title AS Title, department.department_name AS Department, roles.salary, CONCAT(m.first_name, ' ', m.last_name) AS Manager FROM employee e LEFT JOIN employee m ON m.id = e.manager_id JOIN roles ON e.roles_id = roles.id JOIN department ON roles.department_id = department.id ORDER BY department_name ASC",
           function(err, results, fields) {
             clog.table(results); // results contains rows returned by server
           } 
@@ -32,7 +32,7 @@ var promptUser = () => {
           function (err, results, fields) {
             for (i = 0; i < results.length; i++) {
               departments.push(results[i].department_name)
-            } console.log(departments)
+            }
             inquirer.prompt([
               {
                 type: "list",
@@ -317,7 +317,6 @@ var promptUser = () => {
                 choices: departments
               }
             ]).then(rolesAdd => {
-              console.log(departmentsObjArr)
               var department_id = '';
               for (i = 0; i < departmentsObjArr.length; i++) {
                 if (rolesAdd.department === departmentsObjArr[i].department) {
