@@ -11,7 +11,7 @@ promptUser = () => {
         pageSize:15,
         name: "list",
         message: "What would you like to do?",
-        choices: ['View all employees', 'View all employees by department', 'View all employees by manager', 'Add employee', 'Remove employee', 'Update employee role', 'Update employee manager', 'View all roles', 'Add role', 'Remove role', 'Exit node']
+        choices: ['View all employees', 'View all employees by department', 'View all employees by manager', 'Add employee', 'Remove employee', 'Update employee role', 'Update employee manager', 'View all departments', 'Add department', 'Remove department', 'View all roles',  'Add role', 'Remove role', 'Exit node']
       }
     ]).then(({ list }) => {
       if (list === "View all employees") {
@@ -28,6 +28,12 @@ promptUser = () => {
         Fn.updateEmployeeRole();
       } else if (list === "Update employee manager") {
         Fn.updateEmployeeManager();
+      } else if (list === "View all departments") {
+        Fn.viewAllDepartments();
+      } else if (list === "Add department") {
+        Fn.addDepartment();
+      } else if (list === "Remove department") {
+        Fn.removeDepartment();
       } else if (list === "View all roles") {
         Fn.viewAllRoles();
       } else if (list === "Add role") {
